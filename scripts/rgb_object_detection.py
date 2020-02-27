@@ -106,7 +106,6 @@ class RGBObjectDetection:
                     im = np.expand_dims(im, axis=0)
                     im = im.astype('float32')
                     im = im/255.0
-
                     if self.cnn.model_loaded:
                         with self.cnn.graph.as_default():
                             pred = self.cnn.model.predict(im)
@@ -118,20 +117,19 @@ class RGBObjectDetection:
                             label_text = str(self.pred)
                             font_size = 1.0
                             font_thickness = 2
-                            cv2.putText(self.cv_image, label_text, (p1_im_x,p1_im_y), font, font_size,(255,255,255), font_thickness)
+                            #cv2.putText(self.cv_image, label_text, (p2_im_x,p1_im_y), font, font_size,(255,255,255), font_thickness)
 
             #plot expanded bounding box in green
-            cv2.rectangle(self.cv_image, (p1_im_x, p1_im_y), (p2_im_x, p2_im_y), (0, 255, 0), thickness=5)
+                            #cv2.rectangle(self.cv_image, (p1_im_x, p1_im_y), (p2_im_x, p2_im_y), (0, 255, 0), thickness=5)
 
             # publish detection message
-            det_msg = Detection()
-            det_msg.obj_class = self.pred
-            det_msg.point = cen_pc
-            self.detection_pub.publish(det_msg)
-
+                            det_msg = Detection()
+                            det_msg.obj_class = self.pred
+                            det_msg.point = cen_pc
+                            self.detection_pub.publish(det_msg)
             # show image window
-            cv2.imshow("Image window", self.cv_image)
-            cv2.waitKey(3)
+            #cv2.imshow("Image window", self.cv_image)
+            #cv2.waitKey(3)
 
 
 def main():
