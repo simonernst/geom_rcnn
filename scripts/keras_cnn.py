@@ -65,10 +65,10 @@ class CNN:
         self.model.add(MaxPooling2D((2,2), strides=(2,2),dim_ordering="th"))
         self.model.add(Flatten())
         self.model.add(Dropout(0.5))
-	self.model.add(Dense(64))
-	self.model.add(Activation('relu'))
+        self.model.add(Dense(64))
+        self.model.add(Activation('relu'))
         self.model.add(Dropout(0.5))
-	self.model.add(Dense(len(self.categories.keys()),activation='softmax'))
+        self.model.add(Dense(len(self.categories.keys()),activation='softmax'))
 
         if self.verbose:
             print 'compiling model ... '
