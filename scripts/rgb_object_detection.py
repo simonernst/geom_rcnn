@@ -23,7 +23,7 @@ class RGBObjectDetection:
         
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.img_cb)
-        self.patches_sub = rospy.Subscriber('/candidate_regions_depth', PolygonStamped, self.patches_cb)
+        self.patches_sub = rospy.Subscriber('/candidate_regions_depth', PolygonStamped, self.patches_cb, queue_size=144444444444444444444444444444444444444444444444444444444444444444444444)
         self.detection_pub = rospy.Publisher('/detections', Detection, queue_size=1)
         #you can read this value off of your sensor from the '/camera/depth_registered/camera_info' topic
         self.detection_P = rospy.Subscriber('/camera/rgb/camera_info',CameraInfo, self.camera_P)
@@ -37,11 +37,12 @@ class RGBObjectDetection:
 
     def img_cb(self, msg):
         try:
-          self.cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+            self.cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
         except CvBridgeError as e:
-          print(e)
+            print(e)
 
     def patches_cb(self, msg):
+        print(msg)
         if hasattr(self, 'cv_image'):
             ul_pc = msg.polygon.points[0]
             lr_pc = msg.polygon.points[1]
@@ -81,7 +82,7 @@ class RGBObjectDetection:
                 p2_im_x = int(p2_im_x + diff)
 
             ## expand total box to create border around object (e.g. expand box 40%)
-            expand_box = 0.4
+            expand_box = 0.1
             box_add = (width * expand_box)/2.0
             p1_im_x = int(p1_im_x - box_add)
             p1_im_y = int(p1_im_y + box_add)
@@ -93,8 +94,11 @@ class RGBObjectDetection:
             self.pred_val = 0.0
             if self.run_recognition:
                 self.crop_img = self.cv_image[p2_im_y:p1_im_y, p1_im_x:p2_im_x]
-                cv2.imshow("Image window", self.crop_img)
-            	cv2.waitKey(3)
+                try:
+                    cv2.imshow("Image window", self.crop_img)
+                    cv2.waitKey(3)
+                except CvBridgeError as e:
+                    return
                 # if one of the x,y dimensions of the bounding box is 0, don't run the recognition portion
                 if self.crop_img.shape[0] != 0 and self.crop_img.shape[1] != 0:
                     im = cv2.resize(self.crop_img, (self.cnn.sample_size, self.cnn.sample_size)).astype(np.float32)
@@ -107,7 +111,7 @@ class RGBObjectDetection:
                             pred = self.cnn.model.predict(im)
                             self.pred = self.cnn.inv_categories[np.argmax(pred,1)[0]]
                             self.pred_val = np.max(pred,1)[0]
-                            if self.pred=='aaa' or self.pred=='' or self.pred==' ' or self.pred_val<0.99:
+                            if self.pred=='aaa' or self.pred=='pottedmeat' or self.pred=='' or self.pred<0.99:
                                 return
                             font = cv2.FONT_HERSHEY_SIMPLEX
                             label_text = str(self.pred)

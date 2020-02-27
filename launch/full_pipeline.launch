@@ -15,7 +15,7 @@
 		<param name="xmin" value="-1.0" />
 		<param name="xmax" value="1.0" />
 		<param name="ymin" value="-1.0" />
-		<param name="ymax" value="3.0" />
+		<param name="ymax" value="1.0" />
 		<param name="zmin" value="0.5" />
 		<param name="zmax" value="2.0" />
 		<param name="verbose" value="$(arg verbose)" />
