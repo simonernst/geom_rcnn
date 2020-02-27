@@ -34,6 +34,9 @@ class RGBObjectDetection:
             self.cnn = CNN('', self.model_filename, self.weights_filename, self.categories_filename, '', 0, 0, self.verbose)
             self.cnn.load_model()
 
+    def camera_P(self,msg):
+	    self.P=np.array(msg.P).reshape(3,4)
+
     def img_cb(self, msg):
         try:
           self.cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
