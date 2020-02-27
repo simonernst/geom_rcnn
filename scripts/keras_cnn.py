@@ -133,7 +133,7 @@ class CNN:
     def load_model(self):
         self.model = model_from_json(open(self.model_filename).read())
         self.model.load_weights(self.weights_filename)
-        self.categories = np.load(self.categories_filename)
+        self.categories = np.load(self.categories_filename, allow_picke=True)
         with open(self.categories_filename, 'r') as infile:
             self.categories = pickle.load(infile)
         self.inv_categories = {v: k for k, v in self.categories.items()}
