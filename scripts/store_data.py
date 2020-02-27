@@ -22,9 +22,14 @@ class StoreData:
         self.patches_sub = rospy.Subscriber('/candidate_regions_depth', PolygonStamped, self.patches_cb)
         self.capture_sub = rospy.Subscriber('/capture/keyboard', Bool, self.capture_cb)
         # you can read this value off of your sensor from the '/camera/depth_registered/camera_info' topic
-        self.P = np.array([[525.0, 0.0, 319.5, 0.0], [0.0, 525.0, 239.5, 0.0], [0.0, 0.0, 1.0, 0.0]])
+        #self.P = np.array([[570.0, 0.0, 319.5, 0.0], [0.0, 570.0, 239.5, 0.0], [0.0, 0.0, 1.0, 0.0]])
+	    self.detection_P = rospy.Subscriber('/camera/rgb/camera_info',CameraInfo, self.camera_P)
 
         self.capture = False
+
+    def camera_P(self,msg):
+	    self.P=np.array(msg.P).reshape(3,4)
+
 
     def img_cb(self, msg):
         try:
