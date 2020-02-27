@@ -102,6 +102,7 @@ class RGBObjectDetection:
                 # if one of the x,y dimensions of the bounding box is 0, don't run the recognition portion
                 if self.crop_img.shape[0] != 0 and self.crop_img.shape[1] != 0:
                     im = cv2.resize(self.crop_img, (self.cnn.sample_size, self.cnn.sample_size)).astype(np.float32)
+                    im = np.moveaxis(im, -1,0)
                     im = np.expand_dims(im, axis=0)
                     im = im.astype('float32')
                     im = im/255.0
