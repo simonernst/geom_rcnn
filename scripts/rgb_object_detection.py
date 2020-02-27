@@ -27,8 +27,6 @@ class RGBObjectDetection:
         self.detection_pub = rospy.Publisher('/detections', Detection, queue_size=1)
         #you can read this value off of your sensor from the '/camera/depth_registered/camera_info' topic
         self.detection_P = rospy.Subscriber('/camera/rgb/camera_info',CameraInfo, self.camera_P)
-        # cv2.namedWindow('Image',cv2.WINDOW_NORMAL)
-        # cv2.resizeWindow('Image', 1200,1200)
 
         if self.run_recognition:
             self.cnn = CNN('', self.model_filename, self.weights_filename, self.categories_filename, '', 0, 0, self.verbose)
@@ -94,11 +92,9 @@ class RGBObjectDetection:
             self.pred = ''
             self.pred_val = 0.0
             if self.run_recognition:
-                # crop image based on rectangle, note: its img[y: y + h, x: x + w] and *not* img[x: x + w, y: y + h]
                 self.crop_img = self.cv_image[p2_im_y:p1_im_y, p1_im_x:p2_im_x]
-		        cv2.imshow("Image window", self.crop_img)
+                cv2.imshow("Image window", self.crop_img)
             	cv2.waitKey(3)
-
                 # if one of the x,y dimensions of the bounding box is 0, don't run the recognition portion
                 if self.crop_img.shape[0] != 0 and self.crop_img.shape[1] != 0:
                     im = cv2.resize(self.crop_img, (self.cnn.sample_size, self.cnn.sample_size)).astype(np.float32)
