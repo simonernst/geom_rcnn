@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 from keras.models import Sequential
-from keras.layers.core import Flatten, Dense, Dropout
-from keras.layers.convolutional import Convolution2D, MaxPooling2D
+from keras.layers.core import Flatten, Dense, Dropout, Activation
+from keras.layers.convolutional import Conv2D, MaxPooling2D
+from keras.layers.normalization import BatchNormalization
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, History
-from keras.optimizers import RMSprop
+from keras.optimizers import RMSprop, Adam
 from keras.models import model_from_json
+from keras import regularizers, losses
 
 import tensorflow as tf
 
@@ -25,7 +27,7 @@ class CNN:
 
     def __init__(self, data_dir, model_filename, weights_filename, categories_filename, history_filename, train_test_split_percentage, num_training_epochs, verbose):
         self.sample_size = 299 # input image size (will rescale data to this size)
-        self.optimizer = RMSprop(lr=0.001, rho=0.9, epsilon=1e-08)
+        self.optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
         self.train_test_split_percentage = train_test_split_percentage
         self.data_dir = data_dir
         self.model_filename = model_filename
@@ -57,21 +59,16 @@ class CNN:
 
     def make_model(self):
         self.model = Sequential()
-        self.model.add(Convolution2D(32, 3, 3, activation='relu', input_shape=(3,self.sample_size,self.sample_size)))
-        self.model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-        self.model.add(Convolution2D(64, 3, 3, activation='relu'))
-        self.model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-        self.model.add(Convolution2D(128, 3, 3, activation='relu'))
-        self.model.add(MaxPooling2D((2,2), strides=(2,2)))
-
+	self.model.add(Conv2D(32, 3, 3, activation='relu', input_shape=(3,self.sample_size,self.sample_size)))
+        self.model.add(MaxPooling2D((2,2), strides=(2,2),dim_ordering="th"))
+        self.model.add(Conv2D(64, 3, 3, activation='relu'))
+        self.model.add(MaxPooling2D((2,2), strides=(2,2),dim_ordering="th"))
         self.model.add(Flatten())
-        self.model.add(Dense(1152, activation='relu'))
         self.model.add(Dropout(0.5))
-        self.model.add(Dense(625, activation='relu'))
+	self.model.add(Dense(64))
+	self.model.add(Activation('relu'))
         self.model.add(Dropout(0.5))
-        self.model.add(Dense(len(self.categories.keys()), activation='softmax'))
+	self.model.add(Dense(len(self.categories.keys()),activation='softmax'))
 
         if self.verbose:
             print 'compiling model ... '
@@ -94,8 +91,8 @@ class CNN:
             height_shift_range=0.3,
             shear_range=0.2,
             fill_mode='nearest',
-            horizontal_flip=True,
-            vertical_flip=True
+            horizontal_flip=False,
+            vertical_flip=False
             )
         self.datagen.fit(self.xs_train)
 
@@ -111,8 +108,8 @@ class CNN:
         self.checkpointer = ModelCheckpoint(filepath=self.weights_filename, verbose=1, save_best_only=True)
         self.history = History()
 
-        self.model.fit_generator(self.datagen.flow(self.xs_train, self.ys_train, batch_size=32),
-                    samples_per_epoch=len(self.xs_train), nb_epoch=self.num_training_epochs, 
+        self.model.fit_generator(self.datagen.flow(self.xs_train, self.ys_train, batch_size=1),
+                    steps_per_epoch=len(self.xs_train), nb_epoch=self.num_training_epochs, 
                     validation_data=(self.xs_val, self.ys_val),
                     callbacks=[self.checkpointer, self.history])
 
