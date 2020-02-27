@@ -2,7 +2,7 @@
 
 import rospy
 from geometry_msgs.msg import PolygonStamped
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CameraInfo
 from geom_rcnn.msg import Detection
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
