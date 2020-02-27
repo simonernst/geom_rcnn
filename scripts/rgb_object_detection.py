@@ -25,8 +25,8 @@ class RGBObjectDetection:
         self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.img_cb)
         self.patches_sub = rospy.Subscriber('/candidate_regions_depth', PolygonStamped, self.patches_cb)
         self.detection_pub = rospy.Publisher('/detections', Detection, queue_size=1)
-        # you can read this value off of your sensor from the '/camera/depth_registered/camera_info' topic
-	    self.detection_P = rospy.Subscriber('/camera/rgb/camera_info',CameraInfo, self.camera_P)
+        #you can read this value off of your sensor from the '/camera/depth_registered/camera_info' topic
+        self.detection_P = rospy.Subscriber('/camera/rgb/camera_info',CameraInfo, self.camera_P)
         # cv2.namedWindow('Image',cv2.WINDOW_NORMAL)
         # cv2.resizeWindow('Image', 1200,1200)
 
