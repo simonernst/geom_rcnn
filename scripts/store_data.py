@@ -18,7 +18,7 @@ class StoreData:
         self.rate = 1/float(rospy.get_param('/store_data/rate'))
 
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber('/camera/rgb/image_color', Image, self.img_cb)
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.img_cb)
         self.patches_sub = rospy.Subscriber('/candidate_regions_depth', PolygonStamped, self.patches_cb)
         self.capture_sub = rospy.Subscriber('/capture/keyboard', Bool, self.capture_cb)
         # you can read this value off of your sensor from the '/camera/depth_registered/camera_info' topic
