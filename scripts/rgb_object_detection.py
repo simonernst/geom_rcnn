@@ -96,6 +96,8 @@ class RGBObjectDetection:
             if self.run_recognition:
                 # crop image based on rectangle, note: its img[y: y + h, x: x + w] and *not* img[x: x + w, y: y + h]
                 self.crop_img = self.cv_image[p2_im_y:p1_im_y, p1_im_x:p2_im_x]
+		        cv2.imshow("Image window", self.crop_img)
+            	cv2.waitKey(3)
 
                 # if one of the x,y dimensions of the bounding box is 0, don't run the recognition portion
                 if self.crop_img.shape[0] != 0 and self.crop_img.shape[1] != 0:
