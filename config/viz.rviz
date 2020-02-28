@@ -87,7 +87,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: false
-      Image Topic: /camera/rgb/image_color
+      Image Topic: /camera/rgb/image_raw
       Max Value: 1
       Median window: 5
       Min Value: 0

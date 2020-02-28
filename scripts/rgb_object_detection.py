@@ -23,7 +23,7 @@ class RGBObjectDetection:
         
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.img_cb)
-        self.patches_sub = rospy.Subscriber('/candidate_regions_depth', PolygonStamped, self.patches_cb, queue_size=144444444444444444444444444444444444444444444444444444444444444444444444)
+        self.patches_sub = rospy.Subscriber('/candidate_regions_depth', PolygonStamped, self.patches_cb, queue_size=10)
         self.detection_pub = rospy.Publisher('/detections', Detection, queue_size=1)
         #you can read this value off of your sensor from the '/camera/depth_registered/camera_info' topic
         self.detection_P = rospy.Subscriber('/camera/rgb/camera_info',CameraInfo, self.camera_P)
@@ -42,7 +42,6 @@ class RGBObjectDetection:
             print(e)
 
     def patches_cb(self, msg):
-        print(msg)
         if hasattr(self, 'cv_image'):
             ul_pc = msg.polygon.points[0]
             lr_pc = msg.polygon.points[1]
@@ -65,21 +64,22 @@ class RGBObjectDetection:
             # x is positive going right, y is positive going down
             width = p2_im_x - p1_im_x
             height = p1_im_y - p2_im_y
-
+            if width < 20.0 or height < 20.0 or height>4.0*width or width>4.0*height:
+                return
             # expand in y direction to account for angle of sensor
-            expand_height = 0.4 # TODO: fix hack with transform/trig
+            expand_height = 0.1 # TODO: fix hack with transform/trig
             height_add = height * expand_height
             p1_im_y = p1_im_y + int(height_add)
             height = p1_im_y - p2_im_y
-
+            
             # fix bounding box to be square
-            diff = ( abs(width - height) / 2.0)
-            if width > height: # update ys
-                p1_im_y = int(p1_im_y + diff)
-                p2_im_y = int(p2_im_y - diff)
-            elif height > width: # update xs
-                p1_im_x = int(p1_im_x - diff)
-                p2_im_x = int(p2_im_x + diff)
+            #diff = ( abs(width - height) / 2.0)
+            #if width > height: # update ys
+            #    p1_im_y = int(p1_im_y + diff)
+            #    p2_im_y = int(p2_im_y - diff)
+            #elif height > width: # update xs
+            #    p1_im_x = int(p1_im_x - diff)
+            #    p2_im_x = int(p2_im_x + diff)
 
             ## expand total box to create border around object (e.g. expand box 40%)
             expand_box = 0.1
@@ -88,7 +88,7 @@ class RGBObjectDetection:
             p1_im_y = int(p1_im_y + box_add)
             p2_im_x = int(p2_im_x + box_add)
             p2_im_y = int(p2_im_y - box_add)
-
+            
             # optional : run the recognition portion of the pipeline
             self.pred = ''
             self.pred_val = 0.0
@@ -100,7 +100,7 @@ class RGBObjectDetection:
                 except CvBridgeError as e:
                     return
                 # if one of the x,y dimensions of the bounding box is 0, don't run the recognition portion
-                if self.crop_img.shape[0] != 0 and self.crop_img.shape[1] != 0:
+                if self.crop_img.shape[0] != 0 and self.crop_img.shape[1] != 0 and self.crop_img.shape[1] < 100.0 and self.crop_img.shape[0] < 100.0:
                     im = cv2.resize(self.crop_img, (self.cnn.sample_size, self.cnn.sample_size)).astype(np.float32)
                     im = np.moveaxis(im, -1,0)
                     im = np.expand_dims(im, axis=0)
@@ -111,7 +111,7 @@ class RGBObjectDetection:
                             pred = self.cnn.model.predict(im)
                             self.pred = self.cnn.inv_categories[np.argmax(pred,1)[0]]
                             self.pred_val = np.max(pred,1)[0]
-                            if self.pred=='aaa' or self.pred=='pottedmeat' or self.pred=='' or self.pred<0.99:
+                            if self.pred=='aaa' or self.pred=='' or self.pred<1.0:
                                 return
                             font = cv2.FONT_HERSHEY_SIMPLEX
                             label_text = str(self.pred)
@@ -130,6 +130,8 @@ class RGBObjectDetection:
             # show image window
             #cv2.imshow("Image window", self.cv_image)
             #cv2.waitKey(3)
+                else:
+                    return
 
 
 def main():

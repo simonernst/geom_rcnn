@@ -143,9 +143,9 @@ void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
 
   std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  ec.setClusterTolerance (0.05); // 2cm
+  ec.setClusterTolerance (0.02); // 2cm
   ec.setMinClusterSize (25);
-  ec.setMaxClusterSize (750);
+  ec.setMaxClusterSize (800);
   ec.setSearchMethod (tree);
   ec.setInputCloud (cloud_f);
   ec.extract (cluster_indices);
